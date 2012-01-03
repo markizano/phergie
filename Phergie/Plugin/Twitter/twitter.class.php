@@ -38,7 +38,7 @@ class Twitter
      *
      * Do not specify user/password in URL
      */
-    protected $baseUrl = 'http://twitter.com/';
+    protected $baseUrl = 'https://twitter.com/';
     
     /**
      * Full base URL (includes user/pass)
@@ -113,15 +113,18 @@ class Twitter
     public function getLastTweet($tweeter, $num = 1)
     {
         $source = json_decode(
-            file_get_contents($this->getUrlUserTimeline($tweeter))
+            $json = file_get_contents($this->getUrlUserTimeline($tweeter))
         );
+
         if ($num > count($source)) {
             return false;
         }
+
         $tweet = $source[$num - 1];
         if (!isset($tweet->user->screen_name) || !$tweet->user->screen_name) {
             return false;
         }
+
         return $tweet;
     }
     
@@ -316,8 +319,8 @@ class Twitter
      */
     public function getUrlOutputStatus(StdClass $tweet)
     {
-        return $this->baseUrl . urlencode($tweet->user->screen_name)
-            . '/statuses/' . urlencode($tweet->id);
+        return $this->baseUrl . '#!/' . urlencode($tweet->user->screen_name)
+            . '/statuses/' . urlencode($tweet->id_str);
     }
     
     /**

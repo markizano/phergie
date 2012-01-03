@@ -198,15 +198,28 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     protected function formatTweet(StdClass $tweet, $includeUrl = true)
     {
         $ts = $this->plugins->time->getCountDown($tweet->created_at);
+        $format = "<@:{user}> :{tweet} - :{time} ago" . ($includeUrl? " (:{url})": null);
+        isset($this->config['twitter.tweet-format']) && $format = $this->config['twitter.tweet-format'];
+
         $out =  '<@' . $tweet->user->screen_name .'> '
             . preg_replace('/\s+/', ' ', $tweet->text)
             . ' - ' . $ts . ' ago';
-        if ($includeUrl) {
-            $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
-        }
+
+        $out = str_replace(
+            array(
+                ':{user}',
+                ':{tweet}',
+                ':{time}',
+                ':{url}',
+            ), array(
+                $tweet->user->screen_name,
+                $tweet->text,
+                $ts,
+                $includeUrl? $this->twitter->getUrlOutputStatus($tweet): null,
+            ), $format
+        );
 
         $encode = $this->getPluginHandler()->getPlugin('Encoding');
-
         return $encode->decodeEntities($out);
     }
 
